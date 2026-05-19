@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TOSWIM — 游向更好的自己</title>
+  <style>
+    /* ===== Reset & Base ===== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --navy:    #0A1628;
+      --deep:    #061020;
+      --blue:    #0077B6;
+      --cyan:    #00B4D8;
+      --aqua:    #48CAE4;
+      --light:   #ADE8F4;
+      --white:   #FFFFFF;
+      --gold:    #F0A500;
+      --gray:    #8899AA;
+      --card-bg: rgba(255,255,255,0.04);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+      background: var(--navy);
+      color: var(--white);
+      overflow-x: hidden;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    /* ===== Scrollbar ===== */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--deep); }
+    ::-webkit-scrollbar-thumb { background: var(--cyan); border-radius: 2px; }
+
+    /* ===== Navigation ===== */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 60px;
+      height: 72px;
+      background: transparent;
+      transition: background 0.4s, backdrop-filter 0.4s;
+    }
+    nav.scrolled {
+      background: rgba(10, 22, 40, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(0,180,216,0.15);
+    }
+    .nav-logo {
+      font-size: 26px; font-weight: 800; letter-spacing: 3px;
+      background: linear-gradient(90deg, var(--white), var(--cyan));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .nav-links { display: flex; gap: 36px; }
+    .nav-links a {
+      font-size: 14px; letter-spacing: 1px; color: rgba(255,255,255,0.75);
+      position: relative; transition: color 0.3s;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: -4px; left: 0; right: 0;
+      height: 1px; background: var(--cyan);
+      transform: scaleX(0); transition: transform 0.3s;
+    }
+    .nav-links a:hover { color: var(--white); }
+    .nav-links a:hover::after { transform: scaleX(1); }
+    .nav-cta {
+      padding: 10px 24px; border-radius: 24px;
+      border: 1.5px solid var(--cyan);
+      font-size: 13px; letter-spacing: 1px;
+      color: var(--cyan); cursor: pointer;
+      transition: all 0.3s;
+    }
+    .nav-cta:hover { background: var(--cyan); color: var(--navy); }
+
+    /* ===== Hero ===== */
+    #hero {
+      position: relative; height: 100vh; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 60% 40%, #0077B680 0%, transparent 60%),
+                  radial-gradient(ellipse at 20% 80%, #00B4D840 0%, transparent 50%),
+                  linear-gradient(180deg, #061020 0%, #0A1628 100%);
+    }
+    /* Water ripple rings */
+    .ripple-wrap {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      pointer-events: none;
+    }
+    .ripple {
+      position: absolute; border-radius: 50%;
+      border: 1px solid rgba(0,180,216,0.25);
+      animation: ripple-out 6s ease-out infinite;
+    }
+    .ripple:nth-child(1) { width: 300px; height: 300px; animation-delay: 0s; }
+    .ripple:nth-child(2) { width: 500px; height: 500px; animation-delay: 1.5s; }
+    .ripple:nth-child(3) { width: 700px; height: 700px; animation-delay: 3s; }
+    .ripple:nth-child(4) { width: 900px; height: 900px; animation-delay: 4.5s; }
+    @keyframes ripple-out {
+      0%   { transform: scale(0.6); opacity: 0.6; }
+      100% { transform: scale(1.4); opacity: 0; }
+    }
+    /* Wave at bottom */
+    .wave-container {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 180px; overflow: hidden;
+    }
+    .wave {
+      position: absolute; bottom: 0; width: 200%; height: 100%;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 180'%3E%3Cpath fill='%230A1628' fill-opacity='1' d='M0,96L48,112C96,128,192,160,288,154.7C384,149,480,107,576,90.7C672,75,768,85,864,96C960,107,1056,117,1152,112C1248,107,1344,85,1392,74.7L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'/%3E%3C/svg%3E") repeat-x bottom;
+      background-size: 50% 100%;
+    }
+    .wave-1 { animation: wave 8s linear infinite; opacity: 0.4; }
+    .wave-2 { animation: wave 12s linear infinite reverse; opacity: 0.3; background-position: bottom -20px left; }
+    @keyframes wave { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+    .hero-content {
+      position: relative; z-index: 2;
+      text-align: center; max-width: 800px; padding: 0 24px;
+    }
+    .hero-tag {
+      display: inline-block;
+      padding: 6px 18px; border-radius: 20px;
+      border: 1px solid rgba(0,180,216,0.5);
+      font-size: 12px; letter-spacing: 3px; color: var(--cyan);
+      margin-bottom: 32px;
+      animation: fadeUp 0.8s ease both;
+    }
+    .hero-title {
+      font-size: clamp(56px, 10vw, 120px);
+      font-weight: 900; letter-spacing: 8px;
+      line-height: 1;
+      background: linear-gradient(135deg, #FFFFFF 40%, var(--aqua) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      animation: fadeUp 0.8s 0.2s ease both;
+    }
+    .hero-sub {
+      font-size: clamp(14px, 2vw, 18px);
+      letter-spacing: 6px; color: rgba(255,255,255,0.5);
+      margin-top: 12px;
+      animation: fadeUp 0.8s 0.35s ease both;
+    }
+    .hero-slogan {
+      font-size: clamp(18px, 3vw, 28px);
+      font-weight: 300; color: rgba(255,255,255,0.85);
+      margin-top: 36px; letter-spacing: 2px;
+      animation: fadeUp 0.8s 0.5s ease both;
+    }
+    .hero-slogan em { color: var(--cyan); font-style: normal; font-weight: 600; }
+    .hero-btns {
+      display: flex; gap: 16px; justify-content: center; margin-top: 52px;
+      animation: fadeUp 0.8s 0.65s ease both;
+    }
+    .btn-primary {
+      padding: 16px 40px; border-radius: 40px;
+      background: linear-gradient(90deg, var(--blue), var(--cyan));
+      font-size: 15px; font-weight: 600; letter-spacing: 1px;
+      cursor: pointer; border: none; color: white;
+      box-shadow: 0 8px 32px rgba(0,180,216,0.35);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,180,216,0.5); }
+    .btn-outline {
+      padding: 16px 40px; border-radius: 40px;
+      border: 1.5px solid rgba(255,255,255,0.3);
+      font-size: 15px; letter-spacing: 1px;
+      cursor: pointer; background: transparent; color: white;
+      transition: all 0.3s;
+    }
+    .btn-outline:hover { border-color: var(--cyan); color: var(--cyan); }
+    /* scroll indicator */
+    .scroll-hint {
+      position: absolute; bottom: 200px; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      font-size: 11px; letter-spacing: 2px; color: rgba(255,255,255,0.3);
+      animation: pulse 2s ease infinite;
+    }
+    .scroll-hint span { width: 1px; height: 48px; background: linear-gradient(180deg, rgba(0,180,216,0.6), transparent); }
+    @keyframes pulse { 0%,100%{opacity:0.3;} 50%{opacity:1;} }
+
+    /* ===== Section Base ===== */
+    section { position: relative; padding: 120px 60px; }
+    .section-label {
+      font-size: 11px; letter-spacing: 4px; color: var(--cyan);
+      text-transform: uppercase; margin-bottom: 16px;
+    }
+    .section-title {
+      font-size: clamp(32px, 5vw, 56px); font-weight: 800; line-height: 1.1;
+    }
+    .section-title em { color: var(--cyan); font-style: normal; }
+    .divider {
+      width: 48px; height: 3px; border-radius: 2px;
+      background: linear-gradient(90deg, var(--cyan), transparent);
+      margin: 24px 0 48px;
+    }
+
+    /* ===== Reveal animation ===== */
+    .reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.7s, transform 0.7s; }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    /* ===== Stats Bar ===== */
+    #stats {
+      padding: 60px;
+      background: linear-gradient(90deg, rgba(0,119,182,0.15), rgba(0,180,216,0.08));
+      border-top: 1px solid rgba(0,180,216,0.1);
+      border-bottom: 1px solid rgba(0,180,216,0.1);
+    }
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 40px; max-width: 1100px; margin: 0 auto; text-align: center;
+    }
+    .stat-item {}
+    .stat-num {
+      font-size: clamp(40px, 5vw, 64px); font-weight: 900;
+      background: linear-gradient(135deg, var(--white), var(--cyan));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      line-height: 1;
+    }
+    .stat-unit { font-size: 20px; }
+    .stat-label { font-size: 13px; color: var(--gray); letter-spacing: 1px; margin-top: 8px; }
+
+    /* ===== Brand Story ===== */
+    #story { background: var(--navy); }
+    .story-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+    }
+    .story-visual {
+      position: relative; aspect-ratio: 4/5; border-radius: 24px;
+      overflow: hidden;
+    }
+    .story-visual-bg {
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, #0077B6, #00B4D8, #023E8A);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .story-visual-bg svg { width: 60%; opacity: 0.15; }
+    .story-badge {
+      position: absolute; bottom: 32px; right: 32px;
+      width: 110px; height: 110px; border-radius: 50%;
+      background: rgba(10,22,40,0.85);
+      border: 2px solid rgba(0,180,216,0.4);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      backdrop-filter: blur(8px);
+    }
+    .story-badge span:first-child { font-size: 32px; font-weight: 900; color: var(--cyan); }
+    .story-badge span:last-child { font-size: 11px; color: rgba(255,255,255,0.5); letter-spacing: 1px; }
+    .story-year-line {
+      position: absolute; top: 32px; left: 32px;
+      padding: 8px 16px; border-radius: 8px;
+      background: rgba(0,180,216,0.15); border: 1px solid rgba(0,180,216,0.3);
+      font-size: 12px; letter-spacing: 2px; color: var(--cyan);
+    }
+    .story-text p {
+      font-size: 16px; line-height: 2; color: rgba(255,255,255,0.7);
+      margin-bottom: 20px;
+    }
+    .story-text p strong { color: var(--white); }
+    .story-quote {
+      margin-top: 36px; padding: 28px 32px;
+      border-left: 3px solid var(--cyan);
+      background: rgba(0,180,216,0.06);
+      border-radius: 0 12px 12px 0;
+      font-size: 17px; font-weight: 500; line-height: 1.8;
+      color: rgba(255,255,255,0.9);
+      font-style: italic;
+    }
+
+    /* ===== Values ===== */
+    #values {
+      background: linear-gradient(180deg, var(--navy) 0%, #061828 100%);
+    }
+    .values-header { text-align: center; margin-bottom: 80px; }
+    .values-header .divider { margin: 24px auto 0; }
+    .values-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 24px; max-width: 1100px; margin: 0 auto;
+    }
+    .value-card {
+      padding: 48px 36px; border-radius: 20px;
+      background: var(--card-bg);
+      border: 1px solid rgba(255,255,255,0.06);
+      transition: border-color 0.3s, transform 0.3s, background 0.3s;
+      cursor: default;
+    }
+    .value-card:hover {
+      border-color: rgba(0,180,216,0.3);
+      background: rgba(0,180,216,0.06);
+      transform: translateY(-6px);
+    }
+    .value-icon {
+      width: 56px; height: 56px; border-radius: 14px;
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; margin-bottom: 28px;
+    }
+    .value-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 14px; }
+    .value-card p { font-size: 14px; line-height: 1.9; color: rgba(255,255,255,0.55); }
+
+    /* ===== Products ===== */
+    #products { background: var(--deep); }
+    .products-header { max-width: 600px; margin-bottom: 64px; }
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: auto auto;
+      gap: 20px; max-width: 1200px;
+    }
+    .product-card {
+      border-radius: 20px; overflow: hidden;
+      position: relative; cursor: pointer;
+      transition: transform 0.4s;
+    }
+    .product-card:hover { transform: scale(1.02); }
+    .product-card.featured {
+      grid-column: 1 / 2; grid-row: 1 / 3;
+    }
+    .product-inner {
+      aspect-ratio: 1; position: relative; overflow: hidden;
+    }
+    .product-card.featured .product-inner { aspect-ratio: unset; height: 100%; min-height: 500px; }
+    .product-bg {
+      position: absolute; inset: 0;
+      transition: transform 0.5s;
+    }
+    .product-card:hover .product-bg { transform: scale(1.05); }
+    .product-bg-1 { background: linear-gradient(145deg, #023E8A 0%, #0077B6 60%, #00B4D8 100%); }
+    .product-bg-2 { background: linear-gradient(145deg, #03045E 0%, #0077B6 100%); }
+    .product-bg-3 { background: linear-gradient(145deg, #0A1628 0%, #023E8A 100%); }
+    .product-bg-4 { background: linear-gradient(145deg, #00B4D8 0%, #48CAE4 100%); }
+    .product-bg-5 { background: linear-gradient(145deg, #03045E 0%, #023E8A 60%, #0077B6 100%); }
+    .product-emoji {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      font-size: 64px; opacity: 0.25;
+    }
+    .product-card.featured .product-emoji { font-size: 120px; }
+    .product-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(0deg, rgba(6,16,32,0.85) 0%, transparent 60%);
+    }
+    .product-info {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 28px;
+    }
+    .product-tag {
+      display: inline-block; padding: 4px 12px; border-radius: 12px;
+      background: rgba(0,180,216,0.2); border: 1px solid rgba(0,180,216,0.3);
+      font-size: 11px; letter-spacing: 1px; color: var(--cyan);
+      margin-bottom: 10px;
+    }
+    .product-info h3 { font-size: 20px; font-weight: 700; }
+    .product-card.featured .product-info h3 { font-size: 28px; }
+    .product-info p { font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 6px; }
+
+    /* ===== Philosophy ===== */
+    #philosophy { background: var(--navy); overflow: hidden; }
+    .philosophy-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 100px; align-items: center;
+    }
+    .philosophy-text { order: 2; }
+    .philosophy-visual { order: 1; position: relative; }
+    .phil-circle {
+      width: 480px; height: 480px; border-radius: 50%;
+      position: relative;
+      background: radial-gradient(circle at 40% 40%, rgba(0,119,182,0.3), rgba(0,180,216,0.08) 60%, transparent 100%);
+      border: 1px solid rgba(0,180,216,0.12);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .phil-inner-circle {
+      width: 300px; height: 300px; border-radius: 50%;
+      background: radial-gradient(circle at 40% 40%, rgba(0,180,216,0.2), transparent 70%);
+      border: 1px solid rgba(0,180,216,0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 80px; opacity: 0.6;
+    }
+    .phil-orbit {
+      position: absolute; width: 100%; height: 100%;
+      top: 0; left: 0; border-radius: 50%;
+      border: 1px dashed rgba(0,180,216,0.15);
+      animation: spin 20s linear infinite;
+    }
+    .phil-dot {
+      position: absolute; top: -6px; left: calc(50% - 6px);
+      width: 12px; height: 12px; border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 12px var(--cyan);
+    }
+    @keyframes spin { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+    .phil-tags {
+      position: absolute; inset: -40px;
+      pointer-events: none;
+    }
+    .phil-tag {
+      position: absolute; padding: 8px 16px; border-radius: 20px;
+      background: rgba(10,22,40,0.9); border: 1px solid rgba(0,180,216,0.25);
+      font-size: 12px; letter-spacing: 1px; color: var(--cyan);
+      white-space: nowrap;
+    }
+    .phil-tag:nth-child(1) { top: 10%; right: -10%; }
+    .phil-tag:nth-child(2) { top: 50%; right: -20%; transform: translateY(-50%); }
+    .phil-tag:nth-child(3) { bottom: 10%; right: -5%; }
+    .phil-tag:nth-child(4) { top: 10%; left: -10%; }
+    .phil-tag:nth-child(5) { bottom: 10%; left: -15%; }
+    .philosophy-text p {
+      font-size: 16px; line-height: 2; color: rgba(255,255,255,0.65); margin-bottom: 16px;
+    }
+    .phil-points { margin-top: 40px; display: flex; flex-direction: column; gap: 20px; }
+    .phil-point {
+      display: flex; align-items: flex-start; gap: 16px;
+    }
+    .phil-point-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--cyan); margin-top: 8px; flex-shrink: 0;
+      box-shadow: 0 0 8px var(--cyan);
+    }
+    .phil-point h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+    .phil-point p { font-size: 14px; color: rgba(255,255,255,0.5); line-height: 1.7; }
+
+    /* ===== Athletes / Testimonial ===== */
+    #athletes {
+      background: linear-gradient(180deg, #061828 0%, var(--navy) 100%);
+      text-align: center;
+    }
+    .athletes-header { margin-bottom: 72px; }
+    .athletes-header .divider { margin: 24px auto 0; }
+    .athletes-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 24px; max-width: 1100px; margin: 0 auto;
+    }
+    .athlete-card {
+      padding: 40px 24px; border-radius: 20px;
+      background: var(--card-bg);
+      border: 1px solid rgba(255,255,255,0.06);
+      transition: all 0.3s;
+    }
+    .athlete-card:hover {
+      border-color: rgba(0,180,216,0.3);
+      transform: translateY(-4px);
+    }
+    .athlete-avatar {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      margin: 0 auto 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; font-weight: 900;
+    }
+    .athlete-name { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .athlete-title { font-size: 12px; color: var(--cyan); letter-spacing: 1px; margin-bottom: 16px; }
+    .athlete-quote { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.8; font-style: italic; }
+
+    /* ===== CTA ===== */
+    #cta {
+      padding: 160px 60px; text-align: center;
+      background: linear-gradient(180deg, var(--navy) 0%, var(--deep) 100%);
+      position: relative; overflow: hidden;
+    }
+    .cta-glow {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      width: 600px; height: 600px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,119,182,0.2) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    #cta h2 { font-size: clamp(36px,5vw,64px); font-weight: 900; line-height: 1.15; position: relative; }
+    #cta h2 em { color: var(--cyan); font-style: normal; }
+    #cta p { font-size: 18px; color: rgba(255,255,255,0.55); margin: 24px 0 52px; position: relative; }
+    .cta-btns { display: flex; gap: 20px; justify-content: center; position: relative; }
+
+    /* ===== Footer ===== */
+    footer {
+      padding: 64px 60px 40px;
+      background: var(--deep);
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .footer-top {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 60px; margin-bottom: 60px;
+    }
+    .footer-brand-name {
+      font-size: 28px; font-weight: 900; letter-spacing: 4px;
+      background: linear-gradient(90deg, var(--white), var(--cyan));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 16px;
+    }
+    .footer-brand-desc {
+      font-size: 14px; line-height: 1.9; color: rgba(255,255,255,0.4);
+      max-width: 280px;
+    }
+    .footer-social { display: flex; gap: 12px; margin-top: 28px; }
+    .social-btn {
+      width: 38px; height: 38px; border-radius: 10px;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; cursor: pointer; transition: all 0.3s;
+    }
+    .social-btn:hover { background: rgba(0,180,216,0.2); border-color: var(--cyan); }
+    .footer-col h4 {
+      font-size: 13px; font-weight: 600; letter-spacing: 2px;
+      color: var(--white); margin-bottom: 20px; text-transform: uppercase;
+    }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+    .footer-col ul li a {
+      font-size: 14px; color: rgba(255,255,255,0.4); transition: color 0.3s;
+    }
+    .footer-col ul li a:hover { color: var(--cyan); }
+    .footer-bottom {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.06);
+      font-size: 13px; color: rgba(255,255,255,0.25);
+    }
+
+    /* ===== Animations ===== */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 1024px) {
+      section { padding: 80px 32px; }
+      nav { padding: 0 32px; }
+      .story-inner, .philosophy-inner { grid-template-columns: 1fr; gap: 48px; }
+      .philosophy-visual { order: 1; display: flex; justify-content: center; }
+      .phil-circle { width: 320px; height: 320px; }
+      .phil-inner-circle { width: 200px; height: 200px; font-size: 56px; }
+      .values-grid { grid-template-columns: repeat(2, 1fr); }
+      .athletes-grid { grid-template-columns: repeat(2, 1fr); }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-top { grid-template-columns: 1fr 1fr; }
+      .products-grid { grid-template-columns: 1fr 1fr; }
+      .product-card.featured { grid-column: auto; grid-row: auto; }
+      .product-card.featured .product-inner { min-height: auto; }
+      nav .nav-links { display: none; }
+    }
+    @media (max-width: 640px) {
+      section { padding: 64px 20px; }
+      nav { padding: 0 20px; }
+      .values-grid { grid-template-columns: 1fr; }
+      .athletes-grid { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-top { grid-template-columns: 1fr; }
+      .products-grid { grid-template-columns: 1fr; }
+      .hero-btns, .cta-btns { flex-direction: column; align-items: center; }
+      footer { padding: 48px 20px 32px; }
+      #stats { padding: 48px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== Navigation ===== -->
+<nav id="navbar">
+  <div class="nav-logo">TOSWIM</div>
+  <div class="nav-links">
+    <a href="#story">品牌故事</a>
+    <a href="#values">品牌理念</a>
+    <a href="#products">产品系列</a>
+    <a href="#athletes">荣誉见证</a>
+  </div>
+  <div class="nav-cta">探索品牌</div>
+</nav>
+
+<!-- ===== Hero ===== -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="ripple-wrap">
+    <div class="ripple"></div>
+    <div class="ripple"></div>
+    <div class="ripple"></div>
+    <div class="ripple"></div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-tag">PROFESSIONAL SWIMMING BRAND</div>
+    <h1 class="hero-title">TOSWIM</h1>
+    <p class="hero-sub">TO SWIM · TO WIN · TO LIFE</p>
+    <p class="hero-slogan">用专业装备，<em>游向更好的自己</em></p>
+    <div class="hero-btns">
+      <button class="btn-primary" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">探索产品系列</button>
+      <button class="btn-outline" onclick="document.getElementById('story').scrollIntoView({behavior:'smooth'})">了解品牌故事</button>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <p>向下滑动</p>
+    <span></span>
+  </div>
+  <div class="wave-container">
+    <div class="wave wave-1"></div>
+    <div class="wave wave-2"></div>
+  </div>
+</section>
+
+<!-- ===== Stats ===== -->
+<section id="stats">
+  <div class="stats-grid">
+    <div class="stat-item reveal">
+      <div class="stat-num"><span class="count" data-target="12">0</span><span class="stat-unit">+</span></div>
+      <div class="stat-label">品牌创立年数</div>
+    </div>
+    <div class="stat-item reveal">
+      <div class="stat-num"><span class="count" data-target="200">0</span><span class="stat-unit">+</span></div>
+      <div class="stat-label">专业产品 SKU</div>
+    </div>
+    <div class="stat-item reveal">
+      <div class="stat-num"><span class="count" data-target="500">0</span><span class="stat-unit">万+</span></div>
+      <div class="stat-label">服务游泳爱好者</div>
+    </div>
+    <div class="stat-item reveal">
+      <div class="stat-num"><span class="count" data-target="50">0</span><span class="stat-unit">+</span></div>
+      <div class="stat-label">覆盖城市</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Brand Story ===== -->
+<section id="story">
+  <div class="story-inner">
+    <div class="story-visual reveal">
+      <div class="story-visual-bg">
+        <!-- Swimmer silhouette SVG -->
+        <svg viewBox="0 0 200 200" fill="white" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="100" cy="60" rx="18" ry="18"/>
+          <path d="M82 80 Q60 100 50 130 L80 130 Q90 110 100 105 Q110 110 120 130 L150 130 Q140 100 118 80 Z"/>
+          <path d="M50 130 Q40 150 55 160 L95 140 L100 155 L105 140 L145 160 Q160 150 150 130 Z"/>
+          <rect x="62" y="78" width="76" height="8" rx="4"/>
+        </svg>
+      </div>
+      <div class="story-year-line">EST. 2012</div>
+      <div class="story-badge">
+        <span>12</span>
+        <span>YEARS</span>
+      </div>
+    </div>
+    <div class="story-text reveal">
+      <p class="section-label">BRAND STORY</p>
+      <h2 class="section-title">源于热爱，<br /><em>生于水中</em></h2>
+      <div class="divider"></div>
+      <p>
+        <strong>TOSWIM</strong> 创立于 2012 年，由一群对游泳运动充满热情的专业人士共同创立。品牌名称源自英文"To Swim"，代表着对水的热爱、对专业的追求，以及对每一位游泳爱好者的承诺。
+      </p>
+      <p>
+        我们相信，<strong>游泳不只是一项运动，更是一种生活方式</strong>。无论是专业竞技选手还是日常健身人群，都应该拥有高品质、高性能的游泳装备，让每一次入水都成为享受。
+      </p>
+      <p>
+        经过12年深耕，TOSWIM 已发展成为中国专业游泳品牌的领军者，产品涵盖泳镜、泳衣、训练装备等全品类，服务超过500万游泳爱好者。
+      </p>
+      <div class="story-quote">
+        "每一次入水，都是与自己的对话。TOSWIM，陪你游向更好的自己。"
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Values ===== -->
+<section id="values">
+  <div class="values-header reveal">
+    <p class="section-label">BRAND VALUES</p>
+    <h2 class="section-title">我们的<em>品牌理念</em></h2>
+    <div class="divider"></div>
+  </div>
+  <div class="values-grid">
+    <div class="value-card reveal">
+      <div class="value-icon">🎯</div>
+      <h3>专业至上</h3>
+      <p>深耕游泳领域12年，与专业运动员、科研机构紧密合作，将顶级运动科技融入每一款产品，为用户提供专业级运动体验。</p>
+    </div>
+    <div class="value-card reveal">
+      <div class="value-icon">💧</div>
+      <h3>性能突破</h3>
+      <p>采用高性能材料与创新工艺，持续突破产品性能边界。每一款产品都经过严苛测试，确保在水中发挥最优表现。</p>
+    </div>
+    <div class="value-card reveal">
+      <div class="value-icon">🌊</div>
+      <h3>热爱驱动</h3>
+      <p>我们由热爱游泳的人创立，为热爱游泳的人服务。这份热爱渗透进每一个设计细节，让产品不只有功能，更有温度。</p>
+    </div>
+    <div class="value-card reveal">
+      <div class="value-icon">♻️</div>
+      <h3>可持续发展</h3>
+      <p>关注海洋环境保护，积极采用环保材料与绿色生产工艺，在追求运动性能的同时，守护每一片水域的美好。</p>
+    </div>
+    <div class="value-card reveal">
+      <div class="value-icon">🏆</div>
+      <h3>冠军基因</h3>
+      <p>从顶级赛场汲取灵感，将竞技级技术下放至大众产品线，让每一位游泳者都能感受冠军同款的速度与力量。</p>
+    </div>
+    <div class="value-card reveal">
+      <div class="value-icon">🤝</div>
+      <h3>用户共创</h3>
+      <p>与数十万用户建立深度连接，倾听真实需求，共同打磨产品。用户的每一个反馈，都是我们进步的动力。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Products ===== -->
+<section id="products">
+  <div class="products-header reveal">
+    <p class="section-label">PRODUCT LINE</p>
+    <h2 class="section-title">全系列<em>专业产品</em></h2>
+    <div class="divider"></div>
+    <p style="color:rgba(255,255,255,0.5);font-size:15px;line-height:1.8;">
+      从竞技级到训练款，覆盖每一个游泳场景，满足不同水平用户的专业需求。
+    </p>
+  </div>
+  <div class="products-grid">
+    <div class="product-card featured reveal">
+      <div class="product-inner">
+        <div class="product-bg product-bg-1"></div>
+        <div class="product-emoji">🥽</div>
+        <div class="product-overlay"></div>
+        <div class="product-info">
+          <div class="product-tag">BESTSELLER</div>
+          <h3>竞技泳镜系列</h3>
+          <p>超低风阻镜框 · 防雾镀层 · UV400防护 · 精准密封设计</p>
+        </div>
+      </div>
+    </div>
+    <div class="product-card reveal">
+      <div class="product-inner">
+        <div class="product-bg product-bg-2"></div>
+        <div class="product-emoji">🏊</div>
+        <div class="product-overlay"></div>
+        <div class="product-info">
+          <div class="product-tag">PRO SERIES</div>
+          <h3>竞速泳衣</h3>
+          <p>高弹力面料 · 阻力减少15%</p>
+        </div>
+      </div>
+    </div>
+    <div class="product-card reveal">
+      <div class="product-inner">
+        <div class="product-bg product-bg-3"></div>
+        <div class="product-emoji">🎓</div>
+        <div class="product-overlay"></div>
+        <div class="product-info">
+          <div class="product-tag">TRAINING</div>
+          <h3>训练辅助装备</h3>
+          <p>浮板 · 手蹼 · 脚蹼全套</p>
+        </div>
+      </div>
+    </div>
+    <div class="product-card reveal">
+      <div class="product-inner">
+        <div class="product-bg product-bg-4"></div>
+        <div class="product-emoji">🧴</div>
+        <div class="product-overlay"></div>
+        <div class="product-info">
+          <div class="product-tag">CARE</div>
+          <h3>游泳护理系列</h3>
+          <p>专业防晒 · 护发护肤</p>
+        </div>
+      </div>
+    </div>
+    <div class="product-card reveal">
+      <div class="product-inner">
+        <div class="product-bg product-bg-5"></div>
+        <div class="product-emoji">🎽</div>
+        <div class="product-overlay"></div>
+        <div class="product-info">
+          <div class="product-tag">LIFESTYLE</div>
+          <h3>运动生活装备</h3>
+          <p>游泳包 · 泳帽 · 周边配件</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Philosophy ===== -->
+<section id="philosophy">
+  <div class="philosophy-inner">
+    <div class="philosophy-visual reveal">
+      <div class="phil-circle">
+        <div class="phil-orbit">
+          <div class="phil-dot"></div>
+        </div>
+        <div class="phil-inner-circle">🌊</div>
+        <div class="phil-tags">
+          <div class="phil-tag">专业技术</div>
+          <div class="phil-tag">极致性能</div>
+          <div class="phil-tag">用户体验</div>
+          <div class="phil-tag">原创设计</div>
+          <div class="phil-tag">可持续</div>
+        </div>
+      </div>
+    </div>
+    <div class="philosophy-text reveal">
+      <p class="section-label">DESIGN PHILOSOPHY</p>
+      <h2 class="section-title">设计<em>哲学</em></h2>
+      <div class="divider"></div>
+      <p>TOSWIM 的设计理念源自对水的深刻理解——流动、自由、力量。我们将这种自然之美与尖端运动科学相融合，创造出兼具美感与性能的游泳装备。</p>
+      <p>每一款产品的诞生，都经历了从概念到原型、从实验室到泳道的严格检验流程，确保交付到用户手中的，是真正值得信赖的品质。</p>
+      <div class="phil-points">
+        <div class="phil-point">
+          <div class="phil-point-dot"></div>
+          <div>
+            <h4>以数据为基础</h4>
+            <p>每款产品均经过流体力学测试，以科学数据驱动设计优化，减少水阻，提升效率。</p>
+          </div>
+        </div>
+        <div class="phil-point">
+          <div class="phil-point-dot"></div>
+          <div>
+            <h4>以用户为中心</h4>
+            <p>深度访谈超过10,000名游泳者，将真实反馈转化为产品迭代的核心驱动力。</p>
+          </div>
+        </div>
+        <div class="phil-point">
+          <div class="phil-point-dot"></div>
+          <div>
+            <h4>以美学为语言</h4>
+            <p>在高性能之上，赋予产品独特的视觉识别，让专业装备同时成为美的表达。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Athletes ===== -->
+<section id="athletes">
+  <div class="athletes-header reveal">
+    <p class="section-label">COMMUNITY VOICES</p>
+    <h2 class="section-title">他们选择了<em>TOSWIM</em></h2>
+    <div class="divider"></div>
+  </div>
+  <div class="athletes-grid">
+    <div class="athlete-card reveal">
+      <div class="athlete-avatar">李</div>
+      <div class="athlete-name">李明远</div>
+      <div class="athlete-title">国家队游泳运动员</div>
+      <div class="athlete-quote">"TOSWIM 的竞速泳镜帮助我在比赛中保持极佳的视野，每次入水都充满信心。"</div>
+    </div>
+    <div class="athlete-card reveal">
+      <div class="athlete-avatar">张</div>
+      <div class="athlete-name">张晓雨</div>
+      <div class="athlete-title">健身游泳爱好者</div>
+      <div class="athlete-quote">"泳镜的防雾效果真的很出色，每天训练都能保持清晰视线，体验感很好。"</div>
+    </div>
+    <div class="athlete-card reveal">
+      <div class="athlete-avatar">王</div>
+      <div class="athlete-name">王教练</div>
+      <div class="athlete-title">青少年游泳教练</div>
+      <div class="athlete-quote">"我们俱乐部的训练装备全部换成 TOSWIM，学员们的进步速度明显提升了。"</div>
+    </div>
+    <div class="athlete-card reveal">
+      <div class="athlete-avatar">陈</div>
+      <div class="athlete-name">陈思妍</div>
+      <div class="athlete-title">铁人三项参赛者</div>
+      <div class="athlete-quote">"TOSWIM 的专业装备让我在铁三赛事中游泳环节节省了宝贵的时间，爱了！"</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CTA ===== -->
+<section id="cta">
+  <div class="cta-glow"></div>
+  <h2 class="reveal">准备好<em>游向</em><br />更好的自己了吗？</h2>
+  <p class="reveal">加入超过500万游泳爱好者，用专业装备定义你的水中时光。</p>
+  <div class="cta-btns reveal">
+    <button class="btn-primary">立即探索产品</button>
+    <button class="btn-outline">联系我们</button>
+  </div>
+</section>
+
+<!-- ===== Footer ===== -->
+<footer>
+  <div class="footer-top">
+    <div>
+      <div class="footer-brand-name">TOSWIM</div>
+      <p class="footer-brand-desc">专注游泳领域12年，致力于为每一位游泳爱好者提供专业、高性能的运动装备，让游泳运动更美好。</p>
+      <div class="footer-social">
+        <div class="social-btn">微</div>
+        <div class="social-btn">抖</div>
+        <div class="social-btn">小</div>
+        <div class="social-btn">淘</div>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>产品系列</h4>
+      <ul>
+        <li><a href="#">竞技泳镜</a></li>
+        <li><a href="#">训练泳镜</a></li>
+        <li><a href="#">竞速泳衣</a></li>
+        <li><a href="#">训练装备</a></li>
+        <li><a href="#">生活系列</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>品牌</h4>
+      <ul>
+        <li><a href="#">品牌故事</a></li>
+        <li><a href="#">品牌理念</a></li>
+        <li><a href="#">荣誉资质</a></li>
+        <li><a href="#">社会责任</a></li>
+        <li><a href="#">加入我们</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>服务</h4>
+      <ul>
+        <li><a href="#">官方旗舰店</a></li>
+        <li><a href="#">经销商查询</a></li>
+        <li><a href="#">用户社区</a></li>
+        <li><a href="#">售后服务</a></li>
+        <li><a href="#">联系我们</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2024 TOSWIM. All rights reserved.</span>
+    <span>游向更好的自己 · TO SWIM · TO WIN · TO LIFE</span>
+  </div>
+</footer>
+
+<script>
+  // ===== Navbar scroll =====
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 60);
+  });
+
+  // ===== Reveal on scroll =====
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        // stagger siblings
+        const siblings = [...entry.target.parentElement.querySelectorAll('.reveal')];
+        const idx = siblings.indexOf(entry.target);
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, idx * 100);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  reveals.forEach(el => observer.observe(el));
+
+  // ===== Count up animation =====
+  const counts = document.querySelectorAll('.count');
+  const countObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const target = +el.dataset.target;
+        const duration = 1800;
+        const step = target / (duration / 16);
+        let current = 0;
+        const timer = setInterval(() => {
+          current += step;
+          if (current >= target) { current = target; clearInterval(timer); }
+          el.textContent = Math.floor(current);
+        }, 16);
+        countObserver.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+  counts.forEach(el => countObserver.observe(el));
+
+  // ===== Smooth scroll for all anchor links =====
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
+    });
+  });
+</script>
+
+</body>
+</html>
